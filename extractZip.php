@@ -39,7 +39,7 @@ if (is_array($zipFiles) && count($zipFiles) > 0) {
             $zipFolderName = basename($zipFile);
             $zipFileName = basename($zipFile, '.zip');
             $fieDir = $extractedFilesDir . '/' . $zipFileName;
-            
+            rmkdir($extractedFilesDir);
             if (class_exists('ZipArchive')) {
                 $zip = new ZipArchive;
                 $result = $zip->open($zipFile, ZipArchive::CHECKCONS);
@@ -50,9 +50,9 @@ if (is_array($zipFiles) && count($zipFiles) > 0) {
                         $fileType = mime_content_type('zip://' . $zipFile . '#' . $onlyFileName);
                         $fileType = strtolower($fileType);
                         if (($fileType == 'image/png' || $fileType == 'image/jpeg' || $fileType == 'image/gif' || $fileType == 'image/svg') && (preg_match('#\.(SVG|svg|jpg|jpeg|JPEG|JPG|gif|GIF|png|PNG)$#i', $onlyFileName))) {
-                            copy('zip://' . $zipFile . '#' . $onlyFileName, $fieDir . '/' . $onlyFileName);
+                            //copy('zip://' . $zipFile . '#' . $onlyFileName, $fieDir . '/' . $onlyFileName);
+                            $zip->extractTo($extractedFilesDir, array($zip->getNameIndex($i)));
                             $noImageFound = false;
-                            echo 'extracted the image ' . $onlyFileName . ' from ' . $zipFile . ' to ' . $fieDir . '<br />';
                         }
                     }
                     if ($noImageFound) {
@@ -61,13 +61,13 @@ if (is_array($zipFiles) && count($zipFiles) > 0) {
                 } else {
                     switch ($result) {
                         case ZipArchive::ER_NOZIP:
-                            echo 'Not a zip archive ' . basename($zipFolderName);
+                            echo 'Not a zip archive ' . $zipFolderName;
                         case ZipArchive::ER_INCONS:
-                            echo 'Consistency check failed ' . basename($zipFolderName);
+                            echo 'Consistency check failed ' . $zipFolderName;
                         case ZipArchive::ER_CRC:
-                            echo 'checksum failed ' . basename($zipFolderName);
+                            echo 'checksum failed ' . $zipFolderName;
                         default:
-                            echo 'Error occured while extracting file ' . basename($zipFolderName);
+                            echo 'Error occured while extracting file ' . $zipFolderName;
                     }
                 }
                 $zip->close();
